@@ -78,8 +78,10 @@ class MotionSensor():
         # LAUNCH MOTION SENSOR
         try:
             self.sensor = GpioSensor(self.onSensorEvent) 
+            self.log("Using RPi.GPIO adapter", 3)
         except NameError:
             self.sensor = FakeSensor(self.onSensorEvent)
+            self.log("Using FakeSensor as RPi.GPIO adapter seems unavailable", 2)
 
         self.start()
 
