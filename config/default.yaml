@@ -29,7 +29,7 @@ alias:
     KEY_SLOW: "0x0b"
 schedule:
   _defaults:
-    duration: 10
+    duration: 90
     priority: 5
     trigger: 1
   Idle:
