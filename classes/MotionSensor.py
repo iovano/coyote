@@ -6,7 +6,10 @@ import time
 from classes.Scheduler import Scheduler
 from classes.ConfigReader import ConfigReader
 from classes.Logger import Logger
-from classes.GpioSensor import GpioSensor
+try:
+    from classes.GpioSensor import GpioSensor
+except ImportError:
+    from classes.FakeSensor import FakeSensor
 
 class MotionSensor():
     taskWaiting = None
@@ -73,8 +76,10 @@ class MotionSensor():
         self.scheduler.set(self.config.read('schedule'))
 
         # LAUNCH MOTION SENSOR
-
-        self.sensor = GpioSensor(self.onSensorEvent) 
+        try:
+            self.sensor = GpioSensor(self.onSensorEvent) 
+        except NameError:
+            self.sensor = FakeSensor(self.onSensorEvent)
 
         self.start()
 
