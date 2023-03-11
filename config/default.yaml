@@ -1,0 +1,65 @@
+# Scheduler Configuration parameters
+
+prefix: 'ir-ctl -S nec:'
+alias:
+    KEY_UP: "0x5c"
+    KEY_DOWN: "0x5d"
+    KEY_SUSPEND: "0x41"
+    KEY_POWER: "0x40"
+    KEY_RED: "0x58"
+    KEY_GREEN: "0x59"
+    KEY_BLUE: "0x45"
+    KEY_WHITE: "0x44"
+    KEY_ORANGE: "0x50"
+    KEY_YELLOW: "0x18"
+    KEY_TURQUOISE: "0x51"
+    KEY_PURPLE: "0x4d"
+    KEY_PINK: "0x1a"
+    KEY_BRIGHTNESS_25: "0x10"
+    KEY_BRIGHTNESS_50: "0x11"
+    KEY_BRIGHTNESS_75: "0x12"
+    KEY_BRIGHTNESS_100: "0x13"
+    KEY_JUMP3: "0x0c"
+    KEY_FADE3: "0x0d"
+    KEY_JUMP7: "0x0e"
+    KEY_QUICK: "0x0f"
+    KEY_FADE7: "0x08"
+    KEY_FLASH: "0x09"
+    KEY_AUTO: "0x0a"
+    KEY_SLOW: "0x0b"
+schedule:
+  _defaults:
+    do: KEY_SUSPEND
+    duration: 5
+    priority: 5
+    trigger: 1
+  Idle:
+    do: KEY_SUSPEND
+    trigger: 0
+    duration: 0
+    priority: 1
+  Nachtruhe:
+    do: KEY_RED
+    priority: 5
+  Tageszeit:
+    period: '08:00-20:00'
+    do: KEY_PURPLE
+    repeatInterval: 0.1
+    repeat: 3
+    priority: 4
+  Mahlzeit:
+    period: '12:00-18:00'
+    do: KEY_PINK
+    priority: 3
+  Test:
+    period: '13:12-13:20'
+    do: KEY_GREEN
+    priority: 0
+  Wakeup:
+    period: '14:55-15:00'
+    do: KEY_FLASH
+    trigger: # if trigger is empty, this command will be executed regardless of the trigger state. therefore this command serves as a WAKE UP command
+    wakeup: 1 # if wakeup is specified, this command will be executed even if a suspension (duration) has been triggered by the previous command
+    redundancy: 10 # if redundancy is > 0, the respective command will be executed repeatedly
+    priority: 0
+    
