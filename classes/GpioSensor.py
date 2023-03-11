@@ -1,6 +1,5 @@
-#import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 import time
-import random
 
 class GpioSensor():
   def __init__(self, callback, interval = 1, autoStart = False):
@@ -20,10 +19,10 @@ class GpioSensor():
   def init(self):
     # BCM GPIO-Referenen verwenden (anstelle der Pin-Nummern)
     # und GPIO-Eingang definieren
- #   GPIO.setmode(GPIO.BCM)
+    GPIO.setmode(GPIO.BCM)
 
     # Set pin as input
- #   GPIO.setup(self.gpioPir,GPIO.IN)
+    GPIO.setup(self.gpioPir,GPIO.IN)
 
     self.callback(event = 'init', gpioPir = self.gpioPir)
 
@@ -42,8 +41,7 @@ class GpioSensor():
     return self.currentStatus
 
   def getCurrentState(self):
-#   return GPIO.input(self.gpioPir)
-    return random.randrange(2)    
+    return GPIO.input(self.gpioPir)
 
   def start(self):
     try:
@@ -56,4 +54,4 @@ class GpioSensor():
   def stop(self):
     self.halt = True
     self.callback(event = 'exit')
-    #GPIO.cleanup()
+    GPIO.cleanup()
