@@ -29,8 +29,7 @@ alias:
     KEY_SLOW: "0x0b"
 schedule:
   _defaults:
-    do: KEY_SUSPEND
-    duration: 5
+    duration: 10
     priority: 5
     trigger: 1
   Idle:
@@ -39,27 +38,30 @@ schedule:
     duration: 0
     priority: 1
   Nachtruhe:
-    do: KEY_RED
+    do: KEY_POWER,KEY_RED
     priority: 5
   Tageszeit:
     period: '08:00-20:00'
-    do: KEY_PURPLE
+    do: KEY_POWER,KEY_PURPLE
     repeatInterval: 0.1
-    repeat: 3
+    repeat: 1 # if repeat is specified, the assigned commands will be executed n times
     priority: 4
   Mahlzeit:
     period: '12:00-18:00'
-    do: KEY_PINK
+    do: KEY_POWER,KEY_PINK
     priority: 3
   Test:
     period: '13:12-13:20'
-    do: KEY_GREEN
+    trigger: # if trigger is empty, this command will be executed regardless of the trigger state. therefore this command serves as a WAKE UP command
+    wakeup: 1 # if wakeup is specified, this command will be executed even if a suspension (duration) has been triggered by the previous command 
+    do: KEY_POWER,KEY_GREEN
     priority: 0
   Wakeup:
-    period: '14:55-15:00'
-    do: KEY_FLASH
+    period: '16:20,17:10,17:20'
+    duration: 10
+    do: KEY_POWER,KEY_FLASH
     trigger: # if trigger is empty, this command will be executed regardless of the trigger state. therefore this command serves as a WAKE UP command
     wakeup: 1 # if wakeup is specified, this command will be executed even if a suspension (duration) has been triggered by the previous command
-    redundancy: 10 # if redundancy is > 0, the respective command will be executed repeatedly
+    redundancy: 0 # if redundancy is > 0, the respective command will be executed repeatedly
     priority: 0
     

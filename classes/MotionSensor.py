@@ -110,11 +110,11 @@ class MotionSensor():
                     waitUntil = None
 
                 # avoid redundant command executions (unless redundant executions are within a potentially given "redundancy"-range)
-                if (tc.get('do') == previousTask and not tc.get('redundancy') or repeated > (tc.get('redundancy') or 0)):
-                    self.log("skipping redundant command execution ("+tc.get('do')+")", 5)
+                if (tc.name == previousTask and not tc.get('redundancy') or repeated > (tc.get('redundancy') or 0)):
+                    self.log("skipping redundant command execution ("+tc.name+")", 5)
                     continue
 
-                self.log(tc.name+": ["+str(tc.get('periods'))+"] "+tc.get('do')+" (trigger: "+str(tc.get('trigger'))+"/"+str(sensorState)+" prio: "+str(tc.get('priority'))+" duration: "+str(tc.get('duration'))+")")
+                self.log(tc.name+": ["+str(tc.get('periods'))+"] (trigger: "+str(tc.get('trigger'))+"/"+str(sensorState)+" prio: "+str(tc.get('priority'))+" duration: "+str(tc.get('duration'))+")")
 
                 for i in range(tc.get('repeat') or 1):
                     # execute the command (once or repeatedly as specified)
@@ -123,8 +123,8 @@ class MotionSensor():
                     if tc.get('repeatInterval'):
                         time.sleep(tc.get('repeatInterval'))
 
-                if previousTask != tc.get('do'):
-                    previousTask = tc.get('do')
+                if previousTask != tc.name:
+                    previousTask = tc.name
                     repeated = 0
 
                 # if a duration has been specified, suspend loop accordingly
@@ -165,12 +165,14 @@ class MotionSensor():
         self.logger.log(message, level)
 
     def execute(self, command):
-        cmd = self.config.read('prefix')+self.config.read(['alias',command])
-        self.log("Executing Command: "+cmd)
-        #  args = shlex.split(command)
-        #  process = subprocess.Popen(args, stdout=subprocess.PIPE, smotionmotderr=subprocess.PIPE)
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        time.sleep(0.2)
+        commands = command.split(',')
+        for command in commands:
+            cmd = self.config.read('prefix')+self.config.read(['alias',command])
+            self.log("Executing Command: "+cmd)
+            #  args = shlex.split(command)
+            #  process = subprocess.Popen(args, stdout=subprocess.PIPE, smotionmotderr=subprocess.PIPE)
+            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            time.sleep(0.2)
 
     def stop(self):
         self.log("terminate motion surveillance")
