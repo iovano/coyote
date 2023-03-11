@@ -1,6 +1,6 @@
 import RPi.GPIO as GPIO
 import time
-import FakeSensor
+from classes.FakeSensor import FakeSensor
 
 class GpioSensor(FakeSensor):
   def init(self):
