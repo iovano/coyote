@@ -4,24 +4,42 @@ import time
 from yaml.loader import SafeLoader
 
 class ConfigReader():
-    path = ''
+    paths = []
     data = None
     callback = None
 
-    def __init__(self, path, callback = None, autoLoad = True):
+    def __init__(self, paths, callback = None, autoLoad = True):
         self.callback = callback
-        self.bind(path)
+        self.bind(paths)
         if (autoLoad):
             self.load()
 
-    def bind(self, path):
-        self.path = path
+    @staticmethod
+    def merge(source, destination):
+        for key, value in source.items():
+            if isinstance(value, dict):
+                # get node or create one
+                node = destination.setdefault(key, {})
+                ConfigReader.merge(value, node)
+            else:
+                destination[key] = value
 
-    def load(self, path = None):
-        with open(self.path or path) as f:
-            self.data = yaml.load(f, Loader=SafeLoader)
+        return destination
+
+    def bind(self, paths):
+        self.paths = paths
+
+    def load(self, paths = None):
+        paths = paths or self.paths
+        if not type(paths) in (tuple, list):
+            paths = [paths]
+        dataBuf = {}
+        for path in paths:
+            with open(path) as f:
+                dataBuf = ConfigReader.merge(dataBuf, yaml.load(f, Loader=SafeLoader))
         if self.callback:
-            self.callback(time = time.strftime('%Y-%m-%d %H:%M:%S'), event = 'ConfigLoaded', data = self.data)
+                self.callback(time = time.strftime('%Y-%m-%d %H:%M:%S'), event = 'ConfigLoaded', data = self.data)
+        self.data = dataBuf
 
     def dump(self):
         if not self.data:
@@ -31,7 +49,7 @@ class ConfigReader():
     def readWithDefaults(self, data, key, defaultsKey = '_defaults', dropDefaultsAfterMerge = True):
         if hasattr(data, defaultsKey):
             # merge defaults
-            buf = {**data[defaultsKey], **data[key]}
+            buf = ConfigReader.merge(data[defaultsKey], data[key])
             if dropDefaultsAfterMerge:
                 # drop _defaults - key from dict
                 buf.pop(defaultsKey)
