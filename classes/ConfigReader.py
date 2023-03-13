@@ -1,6 +1,7 @@
 import yaml
 import shlex
 import time
+import os
 from yaml.loader import SafeLoader
 
 class ConfigReader():
@@ -29,6 +30,14 @@ class ConfigReader():
     def bind(self, paths):
         self.paths = paths
 
+    @staticmethod
+    def getTimestamp(file):
+        return os.path.getatime(file)
+    
+    @staticmethod
+    def getFileAge(file):
+        return time.time() - os.path.getmtime(file)
+
     def load(self, paths = None):
         paths = paths or self.paths
         if not type(paths) in (tuple, list):
@@ -37,9 +46,11 @@ class ConfigReader():
         for path in paths:
             with open(path) as f:
                 dataBuf = ConfigReader.merge(dataBuf, yaml.load(f, Loader=SafeLoader))
-        if self.callback:
-                self.callback(time = time.strftime('%Y-%m-%d %H:%M:%S'), event = 'ConfigLoaded', data = self.data)
+            if self.callback:
+                self.callback(timestamp = ConfigReader.getTimestamp(path), age = ConfigReader.getFileAge(path), event = 'ConfigPartLoaded', data = dataBuf)
         self.data = dataBuf
+        if self.callback:
+            self.callback(timestamp = ConfigReader.getTimestamp(path), age = ConfigReader.getFileAge(path), event = 'ConfigLoaded', data = self.data)
 
     def dump(self):
         if not self.data:

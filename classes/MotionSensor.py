@@ -2,6 +2,7 @@ import argparse
 import sys
 import subprocess
 import time
+import datetime
 
 from classes.Scheduler import Scheduler
 from classes.ConfigReader import ConfigReader
@@ -12,11 +13,6 @@ except ImportError:
     from classes.FakeSensor import FakeSensor
 
 class MotionSensor():
-    taskWaiting = None
-    taskNext = None
-    taskActive = None
-    taskRecent = None
-
     scheduler = None
     sensor = None
 
@@ -47,14 +43,21 @@ class MotionSensor():
             help="specifies the refreshment interval for timed commands. default: 5 seconds")
         ap.add_argument('-i', "--interval_detection", required=False, nargs='?', const=1, default=1,
             help="specifies the motion detection interval. default: 1 second")
-
+        ap.add_argument('-r', "--interval_config_refresh", required=False, nargs='?', const=1, default=10,
+            help="specifies configuration refresh interval. if the configuration file content has changed, "
+                +"its new config be automatically loaded. if set to 0, configuration will never be refreshed. default: 60 seconds"
+        )
+        ap.add_argument("files",nargs="*", default=['config/default.yaml'])
+        
         args = vars(ap.parse_args())
 
+        self.configFiles = args['files'] or args['files'].get('default')
         self.intervalTimedCommands = args['interval_commands'] or args['interval_commands'].get('default')
         self.intervalMotionDetection = args['interval_detection'] or args['interval_detection'].get('default')
         self.verbosity = int(args['verbosity']) or int(args['verbosity']).get('default')
         self.logfileName = self.logfileName = args['logfile'] or None
         self.mode = args['mode'] or args['mode'].get('default')
+        self.intervalRefreshConfig = int(args['interval_config_refresh']) or int(args['interval_config_refresh']).get('default')
         if args['overwrite'] != '':
             self.mode = 'w+'
 
@@ -68,13 +71,10 @@ class MotionSensor():
         
         # READ CONFIG
 
-        self.config = ConfigReader('config/default.yaml', self.onConfigEvent)
+        self.config = ConfigReader(self.configFiles, self.onConfigLoadedEvent, False)
+        self.config.load()
+
         
-        # LAUNCH SCHEDULER
-
-        self.scheduler = Scheduler(self.onScheduleEvent)
-        self.scheduler.set(self.config.read('schedule'))
-
         # LAUNCH MOTION SENSOR
         try:
             self.sensor = GpioSensor(self.onSensorEvent) 
@@ -84,6 +84,7 @@ class MotionSensor():
             self.log("Using FakeSensor as RPi.GPIO adapter seems unavailable", 2)
 
         self.start()
+
 
     @staticmethod
     def dump(obj):
@@ -95,14 +96,30 @@ class MotionSensor():
         previousTask = None
         repeated = 0
         waitUntil = None
+        lastConfigCheck = time.time()
         # motion detection and command ignition loop
         while self.halt == False:
             try:
                 if not first:
                     time.sleep(self.intervalMotionDetection)
                 sensorState = self.sensor.getCurrentState()
+
+                if lastConfigCheck < time.time() - self.intervalRefreshConfig:
+                    # Check if Configuration Files have been changed
+                    for configFilePath in self.configFiles:
+                        fileTimestamp = ConfigReader.getTimestamp(configFilePath);
+                        self.log("Checking Configuration File "+configFilePath+" for potential modifications.", 5)
+                        if fileTimestamp > lastConfigCheck:
+                            self.log("Configuration updated. Reloading settings.", 3)
+                            self.config.load(self.configFiles)        
+                            continue
+                    lastConfigCheck = time.time()
+
                 tc = self.scheduler.getMergedTask(sensorState)
                 first = False
+                if not tc:
+                    self.log("No task available. Please check configuration", 3)
+                    continue
                 
                 # do not proceed unless the waiting period has expired (or 'wakeup' parameter is set for the current command)
                 if not tc.get('wakeup') and waitUntil and time.time() < waitUntil:
@@ -138,8 +155,13 @@ class MotionSensor():
             except KeyboardInterrupt:
                 self.stop()
 
-    def onConfigEvent(self, **payload):   
-        self.log(payload.get('event'))
+    def onConfigLoadedEvent(self, **payload):   
+        if (payload.get('event') == 'ConfigLoaded'):
+            self.log(str(round(payload.get('age'))) + " " + payload.get('event'))
+
+            self.scheduler = Scheduler(self.onScheduleEvent)
+            self.scheduler.set(self.config.read('schedule'))
+
 
     def onScheduleEvent(self, **payload):
         t = payload.get('tasks')[0]
@@ -163,21 +185,28 @@ class MotionSensor():
             self.log(e,4)
 
 
-    def log(self, message, level = 2):
+    def log(self, message, level = 4):
         self.logger.log(message, level)
 
     def execute(self, command):
         commands = command.split(',')
         for command in commands:
-            resolvedCommand = self.config.read(['alias',command]);
+            resolvedCommand = None
+            try:
+                resolvedCommand = self.config.read(['alias',command]);
+            except KeyError:
+                self.log("Command Key '"+command+"' not found in configuration.", 2)
             if resolvedCommand:
                 cmd = self.config.read('prefix')+resolvedCommand
             else:
                 cmd = command
-            self.log("Executing Command: "+cmd)
-            #  args = shlex.split(command)
-            #  process = subprocess.Popen(args, stdout=subprocess.PIPE, smotionmotderr=subprocess.PIPE)
-            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            self.log("Executing Command: "+cmd, 4)
+
+            # execute shell command and return result if an error occurs
+            pipe = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            res = pipe.communicate()
+            if pipe.returncode != 0:
+                self.log("Command execution failed (code "+str(int(pipe.returncode))+"): "+ str(res[1]), 2)
             time.sleep(0.2)
 
     def stop(self):

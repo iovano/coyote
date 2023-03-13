@@ -27,25 +27,32 @@ class Scheduler():
             firstRun = False
     
     def set(self, schedule, useDefaults = '_defaults'):
-        self.schedule = schedule;
+        self.schedule = schedule
+        self.timedCommands = []
         # populate timedCommands list by schedule configuration items, using defaults from "_defaults"
         for name in self.schedule:
-            item = {**self.schedule[useDefaults], **self.schedule[name]} if useDefaults else self.schedule[name]
+            try:
+                item = {**self.schedule[useDefaults], **self.schedule[name]} if useDefaults else self.schedule[name]
+            except KeyError:
+                item = self.schedule[name]
             if name != useDefaults or not useDefaults:
                 tc = TimedCommand(periods = item.get('period'), priority = item.get('priority'), name = name, payload = item);
                 self.timedCommands.append(tc)
-        # sort timedCommands list by priority (0 = high, ..., 10 = low)
+        # sort timedCommands list by priority (0 = high, ..., 10 = low)w
         self.timedCommands.sort(key=lambda tc: tc.priority)
 
     def getMergedTask(self, trigger = None):
         tasks = self.getCurrentTasks(trigger = trigger, maxConcurrentTasks = None)
-        mainTask = tasks[0]
-        tasks.sort(key=lambda tc: tc.priority, reverse=True)
-        mergedPayload = None
-        for task in tasks:
-            mergedPayload = {**mergedPayload, **task.payload} if mergedPayload else task.payload
-        mainTask.payload = mergedPayload
-        return mainTask
+        try:
+            mainTask = tasks[0]              
+            tasks.sort(key=lambda tc: tc.priority, reverse=True)
+            mergedPayload = None
+            for task in tasks:
+                mergedPayload = {**mergedPayload, **task.payload} if mergedPayload else task.payload
+            mainTask.payload = mergedPayload
+            return mainTask
+        except IndexError:
+            return None
 
     def getCurrentTasks(self, trigger = None, maxConcurrentTasks = None):
         tasks = []
