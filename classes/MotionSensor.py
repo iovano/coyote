@@ -43,7 +43,7 @@ class MotionSensor():
             help="specifies the refreshment interval for timed commands. default: 5 seconds")
         ap.add_argument('-i', "--interval_detection", required=False, nargs='?', const=1, default=1,
             help="specifies the motion detection interval. default: 1 second")
-        ap.add_argument('-r', "--interval_config_refresh", required=False, nargs='?', const=1, default=10,
+        ap.add_argument('-r', "--interval_config_refresh", required=False, nargs='?', const=1, default=60,
             help="specifies configuration refresh interval. if the configuration file content has changed, "
                 +"its new config be automatically loaded. if set to 0, configuration will never be refreshed. default: 60 seconds"
         )
