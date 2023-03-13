@@ -169,7 +169,11 @@ class MotionSensor():
     def execute(self, command):
         commands = command.split(',')
         for command in commands:
-            cmd = self.config.read('prefix')+self.config.read(['alias',command])
+            resolvedCommand = self.config.read(['alias',command]);
+            if resolvedCommand:
+                cmd = self.config.read('prefix')+resolvedCommand
+            else:
+                cmd = command
             self.log("Executing Command: "+cmd)
             #  args = shlex.split(command)
             #  process = subprocess.Popen(args, stdout=subprocess.PIPE, smotionmotderr=subprocess.PIPE)
