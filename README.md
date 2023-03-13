@@ -25,6 +25,13 @@ After you have successfully connected and tested the IR modules, you will most l
 
 You will need to either adjust the configuration file /config/default.yaml in order to use the correct IR signals for your lighting device or create a custom configuration file according to your needs (recommended).
 
+# Usage
+
+* You can execute the application via 
+`.venv/bin/python motionsensor.py`
+* If you want to use a custom configuration file, just add the file name(s) as unnamed parameters to the command like this:
+`.venv/bin/python motionsensor.py --verbosity=5 config/custom.yaml`
+
 # Furter Readings:
 * RPI.GPIO: How to install, setup and use the GPIO bundle on Raspberry Pi devices: https://pypi.org/project/RPi.GPIO
 * IR-CTL: Scan, store and trigger Infrared Commands via the command-line: https://manpages.ubuntu.com/manpages/bionic/man1/ir-ctl.1.html
