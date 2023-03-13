@@ -32,6 +32,19 @@ You will need to either adjust the configuration file /config/default.yaml in or
 * If you want to use a custom configuration file, just add the file name(s) as unnamed parameters to the command like this:
 `.venv/bin/python motionsensor.py --verbosity=5 config/custom.yaml`
 
+# Launch Application on Startup
+
+If you want to automatically load the application, you can add these lines to your `/etc/rc.local`:
+
+```
+cd /opt/iovano/coyote
+.venv/bin/python3 motionsensor.py --logfile=motion.log -v 3 &
+
+exit 0
+```
+
+! Remember to adjust the application path if you installed it somewhere other than `/opt/iovano/coyote`
+
 # Furter Readings:
 * RPI.GPIO: How to install, setup and use the GPIO bundle on Raspberry Pi devices: https://pypi.org/project/RPi.GPIO
 * IR-CTL: Scan, store and trigger Infrared Commands via the command-line: https://manpages.ubuntu.com/manpages/bionic/man1/ir-ctl.1.html
