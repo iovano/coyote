@@ -1,6 +1,6 @@
-# coyote
+# COYOTE 
 
-This application uses *ir-ctl* and *RPi.GPIO* to implement a infrared motion detection system on a *Raspberry Pi (RPi)* device. The app can be used to trigger various events (e.g. lighting control, audio playback, notification messages...) either on motion detection or according to a configured time schedule.
+This application uses *ir-ctl* and *RPi.GPIO* to implement an infrared motion detection system on a *Raspberry Pi (RPi)* device. The app can be used to trigger various events (e.g. lighting on/off, audio playback, intrusion notification messages via e-mail...) either on motion detection or according to a configured time schedule.
 
 The file /config/default.yaml contains a configuration example of how to set up the COYOTE application.
 
@@ -21,7 +21,7 @@ Optional:
 
 Before you can use the motion detection bundle, you have to connect the depicted Infrared modules to your Raspberry Pi using the provided GPIO input/output pins on the device. A comprehensive GPIO pinout chart can be found here: https://community.element14.com/products/raspberry-pi/m/files/17428
 
-After you have successfully connected and tested the IR modules, you will most likely need to scan the IR codes sent by the Infrared Remote Control of your Lighting device. There is a through description of how to do so here: https://blog.gordonturner.com/2020/05/31/raspberry-pi-ir-receiver/
+After you have successfully connected and tested the IR modules, you will most likely need to scan the IR codes sent by the Infrared Remote Control of your Lighting device. There is a thorough description of how to do so here: https://blog.gordonturner.com/2020/05/31/raspberry-pi-ir-receiver/
 
 You will need to either adjust the configuration file /config/default.yaml in order to use the correct IR signals for your lighting device or create a custom configuration file according to your needs (recommended).
 
