@@ -112,14 +112,16 @@ class MotionSensor():
                 sensorInertia = int(self.config.read('trigger.'+str(sensorState)+'.inertia') or 0)
 
                 if (previousState != None and sensorState != previousState):
-                    self.log("Sensor State Change detected (old: "+str(previousState)+" new: "+str(sensorState)+" - inertia: "+str(sensorInertia)+"s)",5)
-                    lastSensorStateChange = time.time()
+                    if (not lastSensorStateChange):
+                        lastSensorStateChange = time.time()
+                    self.log("Sensor State Change detected (old: "+str(previousState)+" new: "+str(sensorState)+" - inertia: "+str(int(time.time() - lastSensorStateChange - sensorInertia))+"s)",5)
 
                 if (lastSensorStateChange and sensorInertia > 0 and time.time() < lastSensorStateChange + sensorInertia):
                     effectiveSensorState = previousState
                 else:
                     effectiveSensorState = sensorState
                     previousState = sensorState
+                    lastSensorStateChange = None
 
                 if lastConfigCheck < time.time() - self.intervalRefreshConfig:
                     # Check if Configuration Files have been changed
