@@ -94,15 +94,30 @@ class MotionSensor():
     def start(self):
         first = True
         previousTask = None
+        previousState = None
         repeated = 0
         waitUntil = None
         lastConfigCheck = time.time()
+        lastSensorStateChange = None
         # motion detection and command ignition loop
         while self.halt == False:
             try:
                 if not first:
                     time.sleep(self.intervalMotionDetection)
+
+                # get the current Sensor status from the GPIO port
                 sensorState = self.sensor.getCurrentState()
+
+                if (previousState != None and sensorState != previousState):
+                    lastSensorStateChange = time.time()
+
+                # if a sensor inertia is specified, the detected sensorState will only come into effect after is has been steady for at least x seconds
+                sensorInertia = int(self.config.read('trigger.'+str(sensorState)+'.inertia') or 0)
+                if (lastSensorStateChange and sensorInertia > 0 and time.time() < lastSensorStateChange + sensorInertia):
+                    effectiveSensorState = previousState
+                else:
+                    effectiveSensorState = sensorState
+                    previousState = sensorState
 
                 if lastConfigCheck < time.time() - self.intervalRefreshConfig:
                     # Check if Configuration Files have been changed
@@ -115,7 +130,7 @@ class MotionSensor():
                             continue
                     lastConfigCheck = time.time()
 
-                tc = self.scheduler.getMergedTask(sensorState)
+                tc = self.scheduler.getMergedTask(effectiveSensorState)
                 first = False
                 if not tc:
                     self.log("No task available. Please check configuration", 3)
@@ -133,7 +148,7 @@ class MotionSensor():
                     self.log("skipping redundant command execution ("+tc.name+")", 5)
                     continue
 
-                self.log(tc.name+": ["+str(tc.get('periods'))+"] (trigger: "+str(tc.get('trigger'))+"/"+str(sensorState)+" prio: "+str(tc.get('priority'))+" duration: "+str(tc.get('duration'))+")")
+                self.log(tc.name+": ["+str(tc.get('periods'))+"] (trigger: "+str(tc.get('trigger'))+"/"+str(effectiveSensorState)+"/"+str(sensorState)+" prio: "+str(tc.get('priority'))+" duration: "+str(tc.get('duration'))+")")
 
                 for i in range(tc.get('repeat') or 1):
                     # execute the command (once or repeatedly as specified)
