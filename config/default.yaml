@@ -2,7 +2,7 @@
 
 prefix: 'ir-ctl -S nec:'
 trigger:
-  0:
+  "0":
     inertia: 60 # if specified, this trigger state will only come into effect after x seconds
 alias:
     KEY_UP: "0x5c"
