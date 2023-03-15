@@ -108,11 +108,13 @@ class MotionSensor():
                 # get the current Sensor status from the GPIO port
                 sensorState = self.sensor.getCurrentState()
 
-                if (previousState != None and sensorState != previousState):
-                    lastSensorStateChange = time.time()
-
                 # if a sensor inertia is specified, the detected sensorState will only come into effect after is has been steady for at least x seconds
                 sensorInertia = int(self.config.read('trigger.'+str(sensorState)+'.inertia') or 0)
+
+                if (previousState != None and sensorState != previousState):
+                    self.log("Sensor State Change detected (old: "+str(previousState)+" new: "+str(sensorState)+" - inertia: "+str(sensorInertia)+"s)",5)
+                    lastSensorStateChange = time.time()
+
                 if (lastSensorStateChange and sensorInertia > 0 and time.time() < lastSensorStateChange + sensorInertia):
                     effectiveSensorState = previousState
                 else:
