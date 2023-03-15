@@ -21,12 +21,14 @@ class Logger():
                     redundantMessage = self.lastMessage + " [repeated "+str(self.redundantMessages)+" times]"
                     self.redundantMessages = 0
                     self.log(redundantMessage, self.lastMessageLevel)
+
+                formattedLogMessage = self.getCurrentTimestamp()+" | "+(self.levels[level] if len(self.levels) > level else '')+" : "+message
                 if self.target != 'STD':
                     logfile = open(self.target, self.mode)
-                    logfile.write("["+self.getCurrentTimestamp()+"]: "+message+"\n")
+                    logfile.write(formattedLogMessage+"\n")
                     logfile.close()
                 else:
-                    print(self.getCurrentTimestamp()+" | "+(self.levels[level] if len(self.levels) > level else '')+" : "+message)
+                    print(formattedLogMessage)
                 self.lastMessage = message
                 self.lastMessageLevel = level
 
