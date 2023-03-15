@@ -140,7 +140,6 @@ class MotionSensor():
                 
                 # do not proceed unless the waiting period has expired (or 'wakeup' parameter is set for the current command)
                 if not tc.get('wakeup') and waitUntil and time.time() < waitUntil:
-                    self.log("waiting for "+str(int(waitUntil - time.time()))+" second(s)...", 5)
                     continue
                 else:
                     waitUntil = None
