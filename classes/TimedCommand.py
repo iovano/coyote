@@ -9,31 +9,31 @@ class TimedCommand():
     self.name = name
     self.active = False
 
-  def isDue(self):
+  def isDue(self, default = None):
     try:
-        periods = self.periods.split(",")
+      return self.isWithinRange(self.periods)
     except AttributeError:
-        return True
-    match = 0
+      return default
+
+  @staticmethod
+  def isWithinRange(periods):
+    periods = periods.split(",")
     for period in periods:
-      if self.isTimeWithinRange(period):
-        match = match + 1
-    return match > 0
-  
-  def isTimeWithinRange(self, period):
-    times = period.split("-")
-    now = datetime.datetime.now()
-    if len(times) == 1:
-      t = self.createTimeFromString(times[0])
-      if now.time()>=t.time() and now.time()<=(t + datetime.timedelta(seconds=60)).time():
-        return True
-    else:
-      t1 = self.createTimeFromString(times[0])
-      t2 = self.createTimeFromString(times[1])
-      if now.time()>t1.time() and now.time()<t2.time():
-        return True
+      times = period.split("-")
+      now = datetime.datetime.now()
+      if len(times) == 1: # we are dealing with a moment (e.g. 20:15)
+        t = TimedCommand.createTimeFromString(times[0])
+        if now.time()>=t.time() and now.time()<=(t + datetime.timedelta(seconds=60)).time():
+          return True
+      else: # we are dealing with a time range (e.g. 20:15-21:45)
+        t1 = TimedCommand.createTimeFromString(times[0])
+        t2 = TimedCommand.createTimeFromString(times[1])
+        if now.time()>t1.time() and now.time()<t2.time():
+          return True
+    return False
       
-  def createTimeFromString(self, string):
+  @staticmethod
+  def createTimeFromString(string):
     try:
       time = datetime.datetime.strptime(string, '%H:%M:%S')
     except ValueError:
