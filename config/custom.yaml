@@ -1,0 +1,21 @@
+# Scheduler Customized Configuration parameters
+# in order to have these configuration settings to come into effect, call the application with the optional [FILES] arguments:
+# .venv/bin/python motionsensor.py --verbosity=4 config/default.yaml config/custom.yaml
+
+prefix: 'ir-ctl -S nec:'
+alias:
+    KEY_BLUB: "0x5c"
+schedule:
+  GutenMorgen:
+    period: '13:32'
+    duration: 10
+    do: KEY_POWER,KEY_FLASH,mpg123 assets/gutenmorgen.mp3
+    trigger: # if trigger is empty, this command will be executed regardless of the trigger state. therefore this command serves as a WAKE UP command
+    wakeup: 1 # if wakeup is specified, this command will be executed even if a suspension (duration) has been triggered by the previous command
+    redundancy: 0 # if redundancy is > 0, the respective command will be executed repeatedly
+    priority: 0
+events:
+  WARN:
+    do: mpg123 assets/parrot-wtf1.mp3
+  ERROR:
+    do: mpg123 assets/parrot-wtf1.mp3
