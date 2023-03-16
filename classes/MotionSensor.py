@@ -7,6 +7,7 @@ import datetime
 from classes.Scheduler import Scheduler
 from classes.ConfigReader import ConfigReader
 from classes.Logger import Logger
+from classes.TimedCommand import TimedCommand
 try:
     from classes.GpioSensor import GpioSensor
 except ImportError:
@@ -117,16 +118,19 @@ class MotionSensor():
 
                 # if a sensor inertia is specified, the detected sensorState will only come into effect after is has been steady for at least x seconds
                 sensorInertia = int(self.config.read('trigger.'+str(sensorState)+'.inertia') or 0)
+                if (self.config.read('trigger.'+str(sensorState)+'.period')):
+                    periods = self.config.read('trigger.'+str(sensorState)+'.period');
+                    for period in periods:
+                        if (TimedCommand.isWithinRange(period)):
+                            sensorInertia = periods[period]['inertia']
 
-                if (effectiveSensorState != None and sensorState != effectiveSensorState):
-                    if (not lastSensorStateChange):
-                        lastSensorStateChange = time.time()
+                if (sensorPreviousState != None and sensorState != sensorPreviousState):
+                    lastSensorStateChange = time.time()
                     if (sensorInertia > 0):
                         self.log("Sensor Inertia applies (wait for "+str(sensorInertia)+"s for new sensor state to come into effect)",5)
 
                 if (not lastSensorStateChange or not sensorInertia or time.time() > lastSensorStateChange + sensorInertia):
                     effectiveSensorState = sensorState
-                    lastSensorStateChange = None
 
                 if lastConfigCheck < time.time() - self.intervalRefreshConfig:
                     # Check if Configuration Files have been changed
@@ -180,7 +184,7 @@ class MotionSensor():
 
     def onConfigLoadedEvent(self, **payload):   
         if (payload.get('event') == 'ConfigLoaded'):
-            self.log(str(round(payload.get('age'))) + " " + payload.get('event'))
+            self.log(payload.get('event')+" - last modified: "+str(round(payload.get('age')))+"s ago")
 
             self.scheduler = Scheduler(self.onScheduleEvent)
             self.scheduler.set(self.config.read('schedule'))

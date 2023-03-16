@@ -58,7 +58,7 @@ class Scheduler():
         tasks = []
         self.activeCommands = []
         for tc in self.timedCommands:
-            if tc.isDue() and ((tc.get('trigger') == None) or (tc.get('trigger')==trigger)):
+            if tc.isDue(True) and ((tc.get('trigger') == None) or (tc.get('trigger')==trigger)):
                 tasks.append(tc)
                 if maxConcurrentTasks == None or len(self.activeCommands) < maxConcurrentTasks: 
                     tc.activate()

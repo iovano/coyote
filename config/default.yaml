@@ -4,6 +4,9 @@ prefix: 'ir-ctl -S nec:'
 trigger:
   "0":
     inertia: 60 # if specified, this trigger state will only come into effect after steadiness of x seconds
+    period: # for periodic adjustments
+      "00:00-06:00,22:00-23:59:59,06:00-22:00":
+        inertia: 36.5
 alias:
     KEY_UP: "0x5c"
     KEY_DOWN: "0x5d"
