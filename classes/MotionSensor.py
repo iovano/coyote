@@ -16,6 +16,7 @@ except ImportError:
 class MotionSensor():
     scheduler = None
     sensor = None
+    config = None
 
     halt = False
 
@@ -213,27 +214,33 @@ class MotionSensor():
 
 
     def log(self, message, level = 4):
+        levels = ['FATAL', 'CRITICAL', 'ERROR', 'WARN', 'NOTICE', 'DEBUG']
         self.logger.log(message, level)
+        if (self.config):
+            event = self.config.read('events.'+levels[level]+'.do');
+            if (event):
+                self.logger.log('Event Handler called for '+levels[level]+': '+event, 4)
+                self.execute(event, False)
 
-    def execute(self, command):
+    def execute(self, command, logging = True):
         commands = command.split(',')
         for command in commands:
             resolvedCommand = None
             try:
                 resolvedCommand = self.config.read(['alias',command]);
             except KeyError:
-                self.log("Command Key '"+command+"' not found in configuration.", 2)
+                if logging: self.log("Command Key '"+command+"' not found in configuration.", 2)
             if resolvedCommand:
                 cmd = self.config.read('prefix')+resolvedCommand
             else:
                 cmd = command
-            self.log("Executing Command: "+cmd, 4)
+            if logging: self.log("Executing Command: "+cmd, 4)
 
             # execute shell command and return result if an error occurs
             pipe = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             res = pipe.communicate()
             if pipe.returncode != 0:
-                self.log("Command execution failed (code "+str(int(pipe.returncode))+"): "+ str(res[1]), 2)
+                if logging: self.log("Command execution failed (code "+str(int(pipe.returncode))+"): "+ str(res[1]), 2)
             time.sleep(0.2)
 
     def stop(self):

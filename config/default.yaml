@@ -71,3 +71,10 @@ schedule:
     wakeup: 1 # if wakeup is specified, this command will be executed even if a suspension (duration) has been triggered by the previous command
     redundancy: 0 # if redundancy is > 0, the respective command will be executed repeatedly
     priority: 0
+    
+# example of customized event handling (here: play back a sound if an ERROR or WARNING occurs)
+#events:
+#  WARN:
+#    do: mpg123 assets/parrot-wtf1.mp3
+#  ERROR:
+#    do: mpg123 assets/parrot-wtf1.mp3
