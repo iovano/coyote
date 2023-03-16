@@ -3,7 +3,7 @@
 prefix: 'ir-ctl -S nec:'
 trigger:
   "0":
-    inertia: 60 # if specified, this trigger state will only come into effect after x seconds
+    inertia: 60 # if specified, this trigger state will only come into effect after steadiness of x seconds
 alias:
     KEY_UP: "0x5c"
     KEY_DOWN: "0x5d"
@@ -39,7 +39,7 @@ schedule:
     do: KEY_SUSPEND
     trigger: 0
     duration: 0
-    priority: 1
+    priority: 2
   Nachtruhe:
     do: KEY_POWER,KEY_RED
     priority: 5
