@@ -94,33 +94,38 @@ class MotionSensor():
     def start(self):
         first = True
         previousTask = None
-        previousState = None
         repeated = 0
         waitUntil = None
         lastConfigCheck = time.time()
         lastSensorStateChange = None
+        effectiveSensorState = None
+        sensorState = None
+        sensorPreviousState = None
         # motion detection and command ignition loop
         while self.halt == False:
             try:
                 if not first:
                     time.sleep(self.intervalMotionDetection)
 
+                sensorPreviousState = sensorState
+
                 # get the current Sensor status from the GPIO port
                 sensorState = self.sensor.getCurrentState()
+
+                if (sensorState != sensorPreviousState):
+                    self.log("Sensor State Change detected (last: "+str(sensorPreviousState or "-")+" new: "+str(sensorState or "-")+")",5)
 
                 # if a sensor inertia is specified, the detected sensorState will only come into effect after is has been steady for at least x seconds
                 sensorInertia = int(self.config.read('trigger.'+str(sensorState)+'.inertia') or 0)
 
-                if (previousState != None and sensorState != previousState):
+                if (effectiveSensorState != None and sensorState != effectiveSensorState):
                     if (not lastSensorStateChange):
                         lastSensorStateChange = time.time()
-                    self.log("Sensor State Change detected (old: "+str(previousState)+" new: "+str(sensorState)+" - inertia: "+str(int(time.time() - lastSensorStateChange - sensorInertia))+"s)",5)
+                    if (sensorInertia > 0):
+                        self.log("Sensor Inertia applies (wait for "+str(sensorInertia)+"s for new sensor state to come into effect)",5)
 
-                if (lastSensorStateChange and sensorInertia > 0 and time.time() < lastSensorStateChange + sensorInertia):
-                    effectiveSensorState = previousState
-                else:
+                if (not lastSensorStateChange or not sensorInertia or time.time() > lastSensorStateChange + sensorInertia):
                     effectiveSensorState = sensorState
-                    previousState = sensorState
                     lastSensorStateChange = None
 
                 if lastConfigCheck < time.time() - self.intervalRefreshConfig:
@@ -151,7 +156,7 @@ class MotionSensor():
                     self.log("skipping redundant command execution ("+tc.name+")", 5)
                     continue
 
-                self.log(tc.name+": ["+str(tc.get('periods'))+"] (trigger: "+str(tc.get('trigger'))+"/"+str(effectiveSensorState)+"/"+str(sensorState)+" prio: "+str(tc.get('priority'))+" duration: "+str(tc.get('duration'))+")")
+                self.log(tc.name+": ["+str(tc.get('periods'))+"] (trigger: "+str(tc.get('trigger'))+"/"+str(effectiveSensorState)+"/"+str(sensorState)+" prio: "+str(tc.get('priority'))+" duration: "+str(tc.get('duration'))+")", 3)
 
                 for i in range(tc.get('repeat') or 1):
                     # execute the command (once or repeatedly as specified)
@@ -168,7 +173,7 @@ class MotionSensor():
                 sleep = tc.get('duration');
                 if (sleep):
                     waitUntil = time.time() + int(sleep)
-                    self.log("sleep for "+str(sleep)+" second(s)")
+                    self.log("sleep: current state remains for "+str(sleep)+" second(s)", 5)
 
             except KeyboardInterrupt:
                 self.stop()
