@@ -56,18 +56,18 @@ schedule:
     period: '12:00-18:00'
     do: KEY_POWER,KEY_PINK
     priority: 3
-  Test:
-    period: '13:12-13:20'
+  FourTwenty:
+    period: '16:20,04:20'
+    duration: 5
     trigger: # if trigger is empty, this command will be executed regardless of the trigger state. therefore this command serves as a WAKE UP command
     wakeup: 1 # if wakeup is specified, this command will be executed even if a suspension (duration) has been triggered by the previous command 
     do: KEY_POWER,KEY_GREEN
     priority: 0
   Wakeup:
-    period: '16:20:00-16:20:10,00:00-00:00:02'
+    period: '9:30'
     duration: 10
     do: KEY_POWER,KEY_FLASH
     trigger: # if trigger is empty, this command will be executed regardless of the trigger state. therefore this command serves as a WAKE UP command
     wakeup: 1 # if wakeup is specified, this command will be executed even if a suspension (duration) has been triggered by the previous command
     redundancy: 0 # if redundancy is > 0, the respective command will be executed repeatedly
     priority: 0
-    
