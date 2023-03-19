@@ -229,7 +229,7 @@ class MotionSensor():
             try:
                 resolvedCommand = self.config.read(['alias',command]);
             except KeyError:
-                if logging: self.log("Command Key '"+command+"' not found in configuration.", 2)
+                if logging: self.log("Command Key '"+command+"' not found in configuration.", 3)
             if resolvedCommand:
                 cmd = self.config.read('prefix')+resolvedCommand
             else:
