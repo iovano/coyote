@@ -164,8 +164,6 @@ class MotionSensor():
         else:
             self.waitUntil = None
 
-        self.onTriggerStateChange(self.previousTask, effectiveSensorState, sensorState)
-
         # avoid redundant command executions (unless redundant executions are within a potentially given "redundancy"-range)
         if (tc.name == self.previousTask and not tc.get('redundancy') or self.repeatedCommand > (tc.get('redundancy') or 0)):
             self.log("skipping redundant command execution ("+tc.name+")", 5)
