@@ -94,10 +94,11 @@ class MotionSensor():
             print("obj.%s = %r" % (attr, getattr(obj, attr)))
 
     def start(self):
+        self.repeatedCommand = 0
+        self.waitUntil = None
+        self.previousTask = None
+
         first = True
-        previousTask = None
-        repeated = 0
-        waitUntil = None
         lastConfigCheck = time.time()
         lastSensorStateChange = None
         effectiveSensorState = None
@@ -144,44 +145,51 @@ class MotionSensor():
                             continue
                     lastConfigCheck = time.time()
 
-                tc = self.scheduler.getMergedTask(effectiveSensorState)
                 first = False
-                if not tc:
-                    self.log("No task available. Please check configuration", 3)
-                    continue
-                
-                # do not proceed unless the waiting period has expired (or 'wakeup' parameter is set for the current command)
-                if not tc.get('wakeup') and waitUntil and time.time() < waitUntil:
-                    continue
-                else:
-                    waitUntil = None
 
-                # avoid redundant command executions (unless redundant executions are within a potentially given "redundancy"-range)
-                if (tc.name == previousTask and not tc.get('redundancy') or repeated > (tc.get('redundancy') or 0)):
-                    self.log("skipping redundant command execution ("+tc.name+")", 5)
-                    continue
-
-                self.log(tc.name+": ["+str(tc.get('periods'))+"] (trigger: "+str(tc.get('trigger'))+"/"+str(effectiveSensorState)+"/"+str(sensorState)+" prio: "+str(tc.get('priority'))+" duration: "+str(tc.get('duration'))+")", 3)
-
-                for i in range(tc.get('repeat') or 1):
-                    # execute the command (once or repeatedly as specified)
-                    self.execute(tc.get('do'))
-                    repeated+=1
-                    if tc.get('repeatInterval'):
-                        time.sleep(tc.get('repeatInterval'))
-
-                if previousTask != tc.name:
-                    previousTask = tc.name
-                    repeated = 0
-
-                # if a duration has been specified, suspend loop accordingly
-                sleep = tc.get('duration');
-                if (sleep):
-                    waitUntil = time.time() + int(sleep)
-                    self.log("sleep: current state remains for "+str(sleep)+" second(s)", 5)
+                self.executeTask(effectiveSensorState, sensorState)
 
             except KeyboardInterrupt:
                 self.stop()
+
+    def executeTask(self, effectiveSensorState, sensorState):
+        tc = self.scheduler.getMergedTask(effectiveSensorState)
+        if not tc:
+            self.log("No task available. Please check configuration", 3)
+            return
+        
+        # do not proceed unless the waiting period has expired (or 'wakeup' parameter is set for the current command)
+        if not tc.get('wakeup') and self.waitUntil and time.time() < self.waitUntil:
+            return
+        else:
+            self.waitUntil = None
+
+        self.onTriggerStateChange(self.previousTask, effectiveSensorState, sensorState)
+
+        # avoid redundant command executions (unless redundant executions are within a potentially given "redundancy"-range)
+        if (tc.name == self.previousTask and not tc.get('redundancy') or self.repeatedCommand > (tc.get('redundancy') or 0)):
+            self.log("skipping redundant command execution ("+tc.name+")", 5)
+            return
+
+
+        self.log(tc.name+": ["+str(tc.get('periods'))+"] (trigger: "+str(tc.get('trigger'))+"/"+str(effectiveSensorState)+"/"+str(sensorState)+" prio: "+str(tc.get('priority'))+" duration: "+str(tc.get('duration'))+")", 3)
+
+        for i in range(tc.get('repeat') or 1):
+            # execute the command (once or self.repeatedCommandly as specified)
+            self.execute(tc.get('do'))
+            self.repeatedCommand+=1
+            if tc.get('repeatInterval'):
+                time.sleep(tc.get('repeatInterval'))
+
+        if self.previousTask != tc.name:
+            self.previousTask = tc.name
+            self.repeatedCommand = 0
+
+        # if a duration has been specified, suspend loop accordingly
+        sleep = tc.get('duration');
+        if (sleep):
+            self.waitUntil = time.time() + int(sleep)
+            self.log("sleep: current state remains for "+str(sleep)+" second(s)", 5)
 
     def onConfigLoadedEvent(self, **payload):   
         if (payload.get('event') == 'ConfigLoaded'):
