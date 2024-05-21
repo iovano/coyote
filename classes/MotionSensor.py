@@ -151,7 +151,7 @@ class MotionSensor:
                             continue
                     lastConfigCheck = time.time()
 
-                self.log(str(self.onBeforeTriggerStateChange),3)
+                self.log(str(type(self.onBeforeTriggerStateChange)),3)
                 if (not lastSensorStateChange or not sensorInertia or time.time() > lastSensorStateChange + sensorInertia):
                     if (not self.onBeforeTriggerStateChange or self.onBeforeTriggerStateChange(self, effectiveSensorState, sensorState) != False):
                         effectiveSensorState = sensorState
