@@ -14,9 +14,9 @@ except ImportError:
     from classes.FakeSensor import FakeSensor
 
 class MotionSensor:
-    scheduler = None
-    sensor = None
-    config = None
+    scheduler: Scheduler                    = None
+    sensor: GpioSensor|FakeSensor           = None
+    config: ConfigReader                    = None
     halt: bool                              = False
 
     ################################
