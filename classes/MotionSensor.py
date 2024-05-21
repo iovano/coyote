@@ -17,11 +17,7 @@ class MotionSensor():
     scheduler = None
     sensor = None
     config = None
-
-    halt = False
-
-    def __init__(self):
-        self.init()
+    halt: bool                              = False
 
     ################################
     #
@@ -32,6 +28,9 @@ class MotionSensor():
     onBeforeTriggerStateChange: function    = None
     onTriggerStateChange: function          = None
     onExecuteCommand: function              = None
+
+    def __init__(self):
+        self.init()
 
     ################################
     #
