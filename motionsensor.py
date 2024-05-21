@@ -5,6 +5,7 @@ from classes.MotionSensor import MotionSensor
 import os.path
 
 def checkIfShairportIsNotStreaming(self, effectiveSensorState, sensorState):
+    self.log("check shairport streaming status", 4)
     if (effectiveSensorState == "1" and sensorState == "0"):
         isStreaming = os.path.isfile("/tmp/shairport-playing")
         if (isStreaming):
