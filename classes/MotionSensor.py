@@ -14,20 +14,20 @@ except ImportError:
     from classes.FakeSensor import FakeSensor
 
 class MotionSensor:
-    scheduler: Scheduler                    = None
-    sensor: GpioSensor|FakeSensor           = None
-    config: ConfigReader                    = None
-    halt: bool                              = False
+    scheduler        = None
+    sensor           = None
+    config           = None
+    halt             = False
 
     ################################
     #
     # OPTIONAL LISTENERS
     #
 
-    onTriggerStateChange: function          = None
-    onBeforeTriggerStateChange: function    = None
-    onTriggerStateChange: function          = None
-    onExecuteCommand: function              = None
+    onTriggerStateChange         = None
+    onBeforeTriggerStateChange   = None
+    onTriggerStateChange         = None
+    onExecuteCommand             = None
 
     def __init__(self):
         self.init()
