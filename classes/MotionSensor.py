@@ -13,7 +13,7 @@ try:
 except ImportError:
     from classes.FakeSensor import FakeSensor
 
-class MotionSensor():
+class MotionSensor:
     scheduler = None
     sensor = None
     config = None
