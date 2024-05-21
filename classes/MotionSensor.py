@@ -25,6 +25,15 @@ class MotionSensor():
 
     ################################
     #
+    # OPTIONAL LISTENERS
+    #
+
+    onTriggerStateChange = None
+    onBeforeTriggerStateChange = None
+    onTriggerStateChange = None
+
+    ################################
+    #
     # DIGEST PARAMETERS
     #
 
@@ -131,9 +140,6 @@ class MotionSensor():
                     if (sensorInertia > 0):
                         self.log("Sensor Inertia applies (wait for "+str(sensorInertia)+"s for new sensor state to come into effect)",5)
 
-                if (not lastSensorStateChange or not sensorInertia or time.time() > lastSensorStateChange + sensorInertia):
-                    effectiveSensorState = sensorState
-
                 if lastConfigCheck < time.time() - self.intervalRefreshConfig:
                     # Check if Configuration Files have been changed
                     for configFilePath in self.configFiles:
@@ -145,14 +151,21 @@ class MotionSensor():
                             continue
                     lastConfigCheck = time.time()
 
-                first = False
+                if (not lastSensorStateChange or not sensorInertia or time.time() > lastSensorStateChange + sensorInertia):
+                    if (not callable(self.onBeforeTriggerStateChange) or self.onBeforeTriggerStateChange(self, effectiveSensorState, sensorState) != False):
+                        effectiveSensorState = sensorState
 
-                self.executeTask(effectiveSensorState, sensorState)
+                first = False
+                self._onTriggerStateChange(effectiveSensorState)
 
             except KeyboardInterrupt:
                 self.stop()
 
-    def executeTask(self, effectiveSensorState, sensorState):
+    def _onTriggerStateChange(self, effectiveSensorState):
+        if (callable(self.onTriggerStateChange)):
+            if (self.onTriggerStateChange(self, effectiveSensorState) == False):
+                return
+            
         tc = self.scheduler.getMergedTask(effectiveSensorState)
         if not tc:
             self.log("No task available. Please check configuration", 3)
@@ -170,14 +183,10 @@ class MotionSensor():
             return
 
 
-        self.log(tc.name+": ["+str(tc.get('periods'))+"] (trigger: "+str(tc.get('trigger'))+"/"+str(effectiveSensorState)+"/"+str(sensorState)+" prio: "+str(tc.get('priority'))+" duration: "+str(tc.get('duration'))+")", 3)
+        self.log(tc.name+": ["+str(tc.get('periods'))+"] (trigger: "+str(tc.get('trigger'))+"/"+str(effectiveSensorState)+" prio: "+str(tc.get('priority'))+" duration: "+str(tc.get('duration'))+")", 3)
 
         for i in range(tc.get('repeat') or 1):
-            # execute the command (once or self.repeatedCommandly as specified)
-            self.execute(tc.get('do'))
-            self.repeatedCommand+=1
-            if tc.get('repeatInterval'):
-                time.sleep(tc.get('repeatInterval'))
+            self._onExecuteCommand(tc)
 
         if self.previousTask != tc.name:
             self.previousTask = tc.name
@@ -188,6 +197,17 @@ class MotionSensor():
         if (sleep):
             self.waitUntil = time.time() + int(sleep)
             self.log("sleep: current state remains for "+str(sleep)+" second(s)", 5)
+
+    def _onExecuteCommand(self, timedCommand):
+        if (callable(self.onExecuteCommand)):
+            if (self.onExecuteCommand(self, timedCommand) == False):
+                return
+        # execute the command (once or self.repeatedCommandly as specified)
+        self.execute(timedCommand.get('do'))
+        self.repeatedCommand+=1
+        if timedCommand.get('repeatInterval'):
+            time.sleep(timedCommand.get('repeatInterval'))
+
 
     def onConfigLoadedEvent(self, **payload):   
         if (payload.get('event') == 'ConfigLoaded'):
