@@ -13,4 +13,4 @@ def checkIfShairportIsNotStreaming(self, effectiveSensorState, sensorState):
         return (not isStreaming)
 
 motionSensor=MotionSensor()
-motionSensor.onBeforeTriggerStateChange = checkIfShairportIsNotStreaming
+MotionSensor.onBeforeTriggerStateChange = checkIfShairportIsNotStreaming
