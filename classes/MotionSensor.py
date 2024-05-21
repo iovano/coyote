@@ -28,10 +28,10 @@ class MotionSensor():
     # OPTIONAL LISTENERS
     #
 
-    onTriggerStateChange = None
-    onBeforeTriggerStateChange = None
-    onTriggerStateChange = None
-    onExecuteCommand = None
+    onTriggerStateChange: function          = None
+    onBeforeTriggerStateChange: function    = None
+    onTriggerStateChange: function          = None
+    onExecuteCommand: function              = None
 
     ################################
     #
