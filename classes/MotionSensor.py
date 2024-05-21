@@ -152,7 +152,7 @@ class MotionSensor():
                     lastConfigCheck = time.time()
 
                 if (not lastSensorStateChange or not sensorInertia or time.time() > lastSensorStateChange + sensorInertia):
-                    if (not callable(self.onBeforeTriggerStateChange) or self.onBeforeTriggerStateChange(self, effectiveSensorState, sensorState) != False):
+                    if (not self.onBeforeTriggerStateChange or self.onBeforeTriggerStateChange(self, effectiveSensorState, sensorState) != False):
                         effectiveSensorState = sensorState
 
                 first = False
@@ -162,7 +162,7 @@ class MotionSensor():
                 self.stop()
 
     def _onTriggerStateChange(self, effectiveSensorState):
-        if (callable(self.onTriggerStateChange)):
+        if (self.onTriggerStateChange):
             if (self.onTriggerStateChange(self, effectiveSensorState) == False):
                 return
             
@@ -199,7 +199,7 @@ class MotionSensor():
             self.log("sleep: current state remains for "+str(sleep)+" second(s)", 5)
 
     def _onExecuteCommand(self, timedCommand):
-        if (callable(self.onExecuteCommand)):
+        if (self.onExecuteCommand):
             if (self.onExecuteCommand(self, timedCommand) == False):
                 return
         # execute the command (once or self.repeatedCommandly as specified)
