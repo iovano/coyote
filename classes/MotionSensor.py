@@ -31,6 +31,7 @@ class MotionSensor():
     onTriggerStateChange = None
     onBeforeTriggerStateChange = None
     onTriggerStateChange = None
+    onExecuteCommand = None
 
     ################################
     #
