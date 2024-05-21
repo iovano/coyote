@@ -12,5 +12,5 @@ def checkIfShairportIsNotStreaming(self, effectiveSensorState, sensorState):
             self.log("shairport is streaming. preventing Idle mode", 3)
         return (not isStreaming)
 
-motionSensor=MotionSensor()
-MotionSensor.onBeforeTriggerStateChange = checkIfShairportIsNotStreaming
+motionSensor = MotionSensor()
+motionSensor.onBeforeTriggerStateChange = lambda: checkIfShairportIsNotStreaming(motionSensor)
