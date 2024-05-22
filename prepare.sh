@@ -1,4 +1,3 @@
-
 python3 -m pip install --user pipenv
 python3 -m pip install --upgrade pip --user
 python3 -m pipenv install requests pyyaml

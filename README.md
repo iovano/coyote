@@ -17,11 +17,24 @@ Optional:
 * 1 RGB(W)-lighting component (e.g. an LED-strip) with infrared remote controlling capability
 * Audio Speakers connected to your Raspberry Pi to trigger audio playback 
 
-# Install and setup devices
+# Device setup and wiring
 
 Before you can use the motion detection bundle, you have to connect the depicted Infrared modules to your Raspberry Pi using the provided GPIO input/output pins on the device. A comprehensive GPIO pinout chart can be found here: https://community.element14.com/products/raspberry-pi/m/files/17428
 
 After you have successfully connected and tested the IR modules, you will most likely need to scan the IR codes sent by the Infrared Remote Control of your Lighting device. There is a thorough description of how to do so here: https://blog.gordonturner.com/2020/05/31/raspberry-pi-ir-receiver/
+
+# Install dependencies
+
+Please note that from Version Raspberry PI OS Bookworm onwards, you have to follow these instructions to set up and configure LIRC:
+https://www.instructables.com/Setup-IR-Remote-Control-Using-LIRC-for-the-Raspber/
+
+## install virtualenv
+
+It is highly recommended to execute the scripts in a virtual (pyton) environment provided by virtualenv. To install it, use this command
+
+`apt install virtualenv`
+
+# Setup
 
 You will need to either adjust the configuration file /config/default.yaml in order to use the correct IR signals for your lighting device or create a custom configuration file according to your needs (recommended).
 
