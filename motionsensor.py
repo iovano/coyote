@@ -6,10 +6,10 @@ import os.path
 import types
 
 def checkIfShairportIsNotStreaming(self, effectiveSensorState, sensorState):
-    if (effectiveSensorState == "1" and sensorState == "0"):
+    if (int(effectiveSensorState) == 1 and int(sensorState) == 0):
         isStreaming = os.path.isfile("/tmp/shairport-playing")
         if (isStreaming):
-            self.log("shairport is streaming. preventing Idle mode", 4)
+            self.log("active shairport stream prevents Idle mode", 4)
         return (not isStreaming)
 
 motionSensor = MotionSensor(False)
