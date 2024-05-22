@@ -13,6 +13,6 @@ def checkIfShairportIsNotStreaming(self, effectiveSensorState, sensorState):
             self.log("shairport is streaming. preventing Idle mode", 3)
         return (not isStreaming)
 
-motionSensor = MotionSensor()
+motionSensor = MotionSensor(False)
 motionSensor.onBeforeTriggerStateChange = types.MethodType(checkIfShairportIsNotStreaming, motionSensor)
-
+motionSensor.start()

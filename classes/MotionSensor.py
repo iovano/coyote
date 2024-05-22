@@ -29,8 +29,8 @@ class MotionSensor:
     onTriggerStateChange         = None
     onExecuteCommand             = None
 
-    def __init__(self):
-        self.init()
+    def __init__(self, autoStart = True):
+        self.init(autoStart)
 
     ################################
     #
@@ -72,10 +72,10 @@ class MotionSensor:
         if args['overwrite'] != '':
             self.mode = 'w+'
 
-    def init(self):
+    def init(self, autoStart = True):
         self.parseArguments()
         self.logger = Logger(self.logfileName or 'STD', self.verbosity);
-        self.log("*** PIR-Module started (CTRL-C to exit) ***")
+        self.log("*** Initializing PIR-Module ***")
         self.log("Starting Infrared Movement Detection Surveillance with verbosity level '"+str(self.verbosity)+"'",3)
         if self.logfileName:
             self.log("Using file '"+self.logfileName+"' with mode '"+self.mode+"' for log messages...",3)
@@ -94,7 +94,8 @@ class MotionSensor:
             self.sensor = FakeSensor(self.onSensorEvent)
             self.log("Using FakeSensor as RPi.GPIO adapter seems unavailable", 2)
 
-        self.start()
+        if autoStart:
+            self.start()
 
 
     @staticmethod
@@ -103,6 +104,7 @@ class MotionSensor:
             print("obj.%s = %r" % (attr, getattr(obj, attr)))
 
     def start(self):
+        self.log("*** Starting PIR-Module (CTRL-C to exit) ***")
         self.repeatedCommand = 0
         self.waitUntil = None
         self.previousTask = None
