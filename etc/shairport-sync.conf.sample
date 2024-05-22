@@ -1,0 +1,6 @@
+// Advanced parameters for controlling how Shairport Sync stays active and how it runs a session
+sessioncontrol =
+{
+        run_this_before_play_begins = "/usr/bin/touch /tmp/shairport-playing"
+        run_this_after_play_ends = "/usr/bin/rm /tmp/shairport-playing"
+};
