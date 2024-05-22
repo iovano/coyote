@@ -58,6 +58,23 @@ exit 0
 
 ! Remember to adjust the application path if you installed it somewhere other than `/opt/iovano/coyote`
 
+# Optional Hooks
+
+You can hook into several event hooks by assigning custom functions to the instantiated `motionSensor` object as illustrated in the file `motionsensor.py`.
+
+There is an example provided which checks whether the device is currently streaming audio via shairport. In order to have this come into effect, you have to make two adjustments to the file `/etc/shairport-sync.conf`:
+
+```
+sessioncontrol = {
+    run_this_before_play_begins = "/usr/bin/touch /tmp/shairport-playing"
+    run_this_after_play_ends = "/usr/bin/rm /tmp/shairport-playing"
+}
+```
+
+This causes shairport to create the file `/tmp/shairport-playing` when playback starts and deletes the file as soon as the streaming stops. By watching the existence of this file, the motionsensor will not enter `idle` mode as long as there is audio playing back, assuming that there is someone in the room when audio is playing.
+
+This is meant as an example of how to modify the behavior of the motionsensor scripts and adapt them to your preferences.
+
 # Furter Readings:
 * RPI.GPIO: How to install, setup and use the GPIO bundle on Raspberry Pi devices: https://pypi.org/project/RPi.GPIO
 * IR-CTL: Scan, store and trigger Infrared Commands via the command-line: https://manpages.ubuntu.com/manpages/bionic/man1/ir-ctl.1.html
