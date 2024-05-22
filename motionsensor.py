@@ -6,7 +6,7 @@ import os.path
 import types
 
 def checkIfShairportIsNotStreaming(self, effectiveSensorState, sensorState):
-    if (int(effectiveSensorState) == 1 and int(sensorState) == 0):
+    if (int(effectiveSensorState or 0) == 1 and int(sensorState) == 0):
         isStreaming = os.path.isfile("/tmp/shairport-playing")
         if (isStreaming):
             self.log("active shairport stream prevents Idle mode", 4)
