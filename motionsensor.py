@@ -3,6 +3,7 @@
 
 from classes.MotionSensor import MotionSensor
 import os.path
+import types
 
 def checkIfShairportIsNotStreaming(self, effectiveSensorState, sensorState):
     self.log("check shairport streaming status", 4)
@@ -13,6 +14,5 @@ def checkIfShairportIsNotStreaming(self, effectiveSensorState, sensorState):
         return (not isStreaming)
 
 motionSensor = MotionSensor()
-motionSensor.onBeforeTriggerStateChange = checkIfShairportIsNotStreaming.__get__(motionSensor, MotionSensor)
-motionSensor.onBeforeTriggerStateChange()
+motionSensor.onBeforeTriggerStateChange = types.MethodType(checkIfShairportIsNotStreaming, motionSensor)
 
